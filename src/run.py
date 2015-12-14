@@ -26,17 +26,21 @@ def status(request):
 
 @app.route('/api/notify/', methods=['POST'])
 def notify(request):
-    application = request.args.get('application')
+
+    # TODO: check token to auth and resolve application data
+
+    app_key = request.getHeader('authorization').split(' ')
+
+    if app_key[1] == '25bbdcd06c32d477f7fa1c3e4a91b032': app = 'it.infoporto.nightbook-apple'
+    if app_key[1] == 'fcd04e26e900e94b9ed6dd604fed2b64': app = 'it.infoporto.nightbook-android'
     message = request.args.get('message')
     sound = request.args.get('sound') or 'default'
-    badge = request.args.get('badge') or 1
-    platform = request.args.get('platform') or None
-    token = request.data.get('token')
+    badge = request.args.get('badge') or None
+    token = request.args.get('token')[0]
 
     request.setHeader('Content-Type', 'application/json')
-    if platform[0] == 'APPLE':
-        notify = AppleNotification(application=application, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
-        notify.send()
+    notify = AppleNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
+    notify.send()
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ class Notification(object):
 
     def __init__(self, token, application, content):
         #self.application = application ... fetched from db
-        self.application = Application(bundle=application, cert_file='nbdev_cert.pem', cert_key='nbdev_key.pem', debug=True)
+        self.application = Application(code_name=application, cert_file='nbdev_cert.pem', cert_key='nbdev_key.pem', debug=True)
         self.content = content
         self.token = token
 

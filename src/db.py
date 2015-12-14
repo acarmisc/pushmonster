@@ -19,7 +19,7 @@ class Application(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
-    bundle = Column(String)
+    code_name = Column(String)
     description = Column(String)
     platform = Column(String)
     active = Column(Boolean)

@@ -1,8 +1,8 @@
 import time
 from apns import APNs, Frame, Payload
 from db import Application
+from gcm import GCM
 
-apns = APNs(use_sandbox=True, cert_file='nbdev_cert.pem', key_file='nbdev_key.pem')
 
 class Notification(object):
 
@@ -21,6 +21,14 @@ class AppleNotification(Notification):
         # Send a notification
         payload = Payload(alert=str(self.content.get('alert')), sound=self.content.get('sound'), badge=self.content.get('badge'))
         apns.gateway_server.send_notification(self.token, payload)
+
+
+class AndroidNotification(Notification):
+    gcm = GCM('AIzaSyDfRGJLpgBOjIBb_t-Ka78JoWcw4j5Gw_o')
+
+    def send(self):
+        # Send a notification
+        gcm.plaintext_request(registration_id=self.token, data=dict(message=str(self.content.get('alert'))))
 
 
 if __name__ == '__main__':

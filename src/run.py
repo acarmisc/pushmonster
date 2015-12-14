@@ -35,6 +35,7 @@ def notify(request):
 
     if app_key[1] == '25bbdcd06c32d477f7fa1c3e4a91b032': app = 'it.infoporto.nightbook-apple'
     if app_key[1] == 'fcd04e26e900e94b9ed6dd604fed2b64': app = 'it.infoporto.nightbook-android'
+
     message = request.args.get('message')
     sound = request.args.get('sound')[0] or 'default'
     badge = request.args.get('badge') or None
@@ -43,7 +44,12 @@ def notify(request):
     logger.debug('data: %s, %s, %s' % (token, message, sound))
 
     request.setHeader('Content-Type', 'application/json')
-    notify = AppleNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
+    if app == 'it.infoporto.nightbook-apple':
+        notify = AppleNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
+
+    if app == 'it.infoporto.nightbook-android':
+        notify = AndroidNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
+
     notify.send()
 
 

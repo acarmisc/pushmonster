@@ -24,9 +24,9 @@ class AppleNotification(Notification):
 
 
 class AndroidNotification(Notification):
-    gcm = GCM('AIzaSyDfRGJLpgBOjIBb_t-Ka78JoWcw4j5Gw_o')
 
     def send(self):
+        gcm = GCM('AIzaSyDfRGJLpgBOjIBb_t-Ka78JoWcw4j5Gw_o')
         # Send a notification
         gcm.plaintext_request(registration_id=self.token, data=dict(message=str(self.content.get('alert'))))
 

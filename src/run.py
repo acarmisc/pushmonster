@@ -3,7 +3,7 @@ import logging
 import sys
 
 import treq
-from apple import AppleNotification
+from apple import AppleNotification, AndroidNotification
 from klein import Klein
 from nightbook import Nightbook
 from shared import Responder

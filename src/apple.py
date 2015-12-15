@@ -3,14 +3,26 @@ from apns import APNs, Frame, Payload
 from db import Application
 from gcm import GCM
 
+from twisted.python import log
+
 
 class Notification(object):
 
     def __init__(self, token, application, content):
-        #self.application = application ... fetched from db
-        self.application = Application(code_name=application, cert_file='nbdev_cert.pem', cert_key='nbdev_key.pem', debug=True)
+        # self.application = application ... fetched from db
+        self.app = application
         self.content = content
         self.token = token
+        #Application(code_name=application, cert_file='nbdev_cert.pem', cert_key='nbdev_key.pem', debug=True)
+
+    def send(self):
+        log.msg('Trying to send to %s using %s on %s' % (self.token, self.app.name, self.app.platform))
+
+        if self.app.platform == 'ANDROID':
+            AndroidNotification(self).send()
+
+        if self.app.platform == 'APPLE':
+            AppleNotification(self).send()
 
 
 class AppleNotification(Notification):

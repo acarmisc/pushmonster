@@ -1,29 +1,15 @@
 import json
-import logging
 import sys
-
-import treq
-from apple import AppleNotification, AndroidNotification
+import logging
+from notifications import Notification
 from klein import Klein
-from nightbook import Nightbook
 from shared import Responder
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.python import log
 
+from db import Application
+
 app = Klein()
-nb = Nightbook(url='http://dev.nightbook.me/')
-
-logger = logging.getLogger(__name__)
-
-
-@app.route('/api/status/', methods=['GET'])
-@inlineCallbacks
-def status(request):
-    request.setHeader('Content-Type', 'application/json')
-    r = yield treq.get(nb.status())
-    content = yield r.json()
-
-    returnValue(Responder().OK(json.dump(content)))
 
 
 @app.route('/api/notify/', methods=['POST'])
@@ -31,26 +17,25 @@ def notify(request):
 
     # TODO: check token to auth and resolve application data
 
-    app_key = request.getHeader('authorization').split(' ')
+    app_key = request.getHeader('Authorization').split(' ')
 
-    if app_key[1] == '25bbdcd06c32d477f7fa1c3e4a91b032': app = 'it.infoporto.nightbook-apple'
-    if app_key[1] == 'fcd04e26e900e94b9ed6dd604fed2b64': app = 'it.infoporto.nightbook-android'
+    app = Application(key=app_key[1]).auth()
 
-    message = request.args.get('message')
+    message = request.args.get('message')[0]
     sound = request.args.get('sound')[0] or 'default'
-    badge = request.args.get('badge') or None
+    badge = request.args.get('badge') or 0
     token = request.args.get('token')[0]
 
-    logger.debug('data: %s, %s, %s' % (token, message, sound))
+    log.msg('data: %s, %s, %s' % (token, message, sound), logLevel=logging.DEBUG)
 
     request.setHeader('Content-Type', 'application/json')
-    if app == 'it.infoporto.nightbook-apple':
-        notify = AppleNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
 
-    if app == 'it.infoporto.nightbook-android':
-        notify = AndroidNotification(application=app, token=token, content=dict(alert=message[0], sound=sound, badge=badge))
-
-    notify.send()
+    content = dict(alert=message, sound=sound, badge=badge)
+    if app:
+        notification = Notification(token=token, app=app, content=content)
+        notification.send()
+    else:
+        log.msg('No application found with key %s' % app_key[1], logLevel=logging.WARNING)
 
 
 if __name__ == "__main__":

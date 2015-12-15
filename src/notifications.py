@@ -1,6 +1,8 @@
-from apns import APNs, Frame, Payload
+from apns import APNs, Payload
 from db import Application
 from gcm import GCM
+
+from twisted.internet.defer import Deferred
 
 from twisted.python import log
 
@@ -20,6 +22,8 @@ class Notification(object):
 
         if self.app.platform == 'APPLE':
             AppleNotification(self.token, self.app, self.content).send()
+
+        return Deferred
 
 
 class AppleNotification(Notification):

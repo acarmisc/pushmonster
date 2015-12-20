@@ -2,14 +2,28 @@ import sys
 import logging
 from notifications import Notification
 from klein import Klein
-from twisted.internet.defer import Deferred
 
-# from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.python import log
 
 from db import Application
 
 app = Klein()
+
+def foo():
+    log.msg('foo')
+    import time
+    import random
+    s = random.randint(0,5)
+    time.sleep(s)
+    return s
+
+@app.route('/api/testme', methods=['GET'])
+@inlineCallbacks
+def testme(request):
+    r = yield foo()
+    log.msg("All done. in %s for %s" % (r, request.args.get('from')))
+    returnValue("All done. in %s" % r)
 
 
 @app.route('/api/notify/', methods=['POST'])

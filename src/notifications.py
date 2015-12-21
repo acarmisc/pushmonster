@@ -15,7 +15,7 @@ class Notification(object):
         self.content = content
 
     def send(self):
-        log.msg('Trying to send to %s using %s on %s' % (self.token, self.app.name, self.app.platform))
+        log.msg('Trying to send to %s... using %s on %s' % (self.token[:8], self.app.name, self.app.platform))
 
         if self.app.platform == 'ANDROID':
             AndroidNotification(self.token, self.app, self.content).send()
@@ -39,7 +39,7 @@ class AppleNotification(Notification):
                           )
 
         apns.gateway_server.send_notification(self.token, payload)
-        log.msg('Notification sent to %s' % self.token)
+        log.msg('Notification sent to %s...' % self.token[:3])
 
 
 class AndroidNotification(Notification):

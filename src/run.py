@@ -48,7 +48,6 @@ def notify(request):
         d = Deferred()
         notification = Notification(token=token, app=app, content=content)
         d.addCallback(notification.send())
-        d.callback(None)
 
     else:
         log.msg('No application found with key %s' % app_key[1], logLevel=logging.WARNING)

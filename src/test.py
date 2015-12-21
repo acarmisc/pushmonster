@@ -21,7 +21,7 @@ def main(reactor, *args):
 def requestFactory():
     for i in range (0, 15):
         import random
-        deferred = treq.get('http://localhost:8080/?k=%s' % i)
+        deferred = treq.get('http://localhost:8080/api/notify?k=%s' % i)
         deferred.addCallback(lambda x:x)        
         print('Generated %s' % i)
         reactor.iterate(1)

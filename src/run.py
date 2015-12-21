@@ -10,30 +10,23 @@ from db import Application
 
 app = Klein()
 
-def foo():
-    log.msg('foo')
-    import time
-    import random
-    s = random.randint(0,5)
-    time.sleep(s)
-    return s
-
-@app.route('/api/testme', methods=['GET'])
-@inlineCallbacks
-def testme(request):
-    r = yield foo()
-    log.msg("All done. in %s for %s" % (r, request.args.get('from')))
-    returnValue("All done. in %s" % r)
-
 
 @app.route('/api/notify/', methods=['POST'])
+@inlineCallbacks
 def notify(request):
     try:
         app_key = request.getHeader('Authorization').split(' ')[1]
     except:
         # TODO: handle this
-        return
+        returnValue('KO')
 
+    response = yield send_now(app_key, request)
+
+    returnValue('OK')
+
+
+@inlineCallbacks
+def send_now(app_key, request):
     app = Application(key=app_key).auth()
 
     message = request.args.get('message')[0]
@@ -45,12 +38,13 @@ def notify(request):
 
     content = dict(alert=message, sound=sound, badge=badge)
     if app:
-        d = Deferred()
         notification = Notification(token=token, app=app, content=content)
-        d.addCallback(notification.send())
+        notification.send()
 
     else:
         log.msg('No application found with key %s' % app_key[1], logLevel=logging.WARNING)
+
+    yield 'OK'
 
 
 if __name__ == "__main__":

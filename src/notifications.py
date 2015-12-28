@@ -17,11 +17,13 @@ class Notification(object):
     def send(self):
         log.msg('Trying to send to %s... using %s on %s' % (self.token[:8], self.app.name, self.app.platform))
 
-        if self.app.platform == 'ANDROID':
-            AndroidNotification(self.token, self.app, self.content).send()
+        recipients = self.token.split(',')
+        for r in recipients:
+            if self.app.platform == 'ANDROID':
+                AndroidNotification(r, self.app, self.content).send()
 
-        if self.app.platform == 'APPLE':
-            AppleNotification(self.token, self.app, self.content).send()
+            if self.app.platform == 'APPLE':
+                AppleNotification(r, self.app, self.content).send()
 
         return Deferred
 
@@ -35,9 +37,10 @@ class AppleNotification(Notification):
 
         payload = Payload(alert=str(self.content.get('alert')),
                           sound=self.content.get('sound'),
-                          badge=self.content.get('badge')
+                          badge=self.content.get('badge'),
+                          custom=self.content.get('extra')
                           )
-
+        
         apns.gateway_server.send_notification(self.token, payload)
         log.msg('Notification sent to %s...' % self.token[:3])
 
@@ -46,10 +49,11 @@ class AndroidNotification(Notification):
 
     def send(self):
         gcm = GCM(self.app.android_key)
-
-        payload = dict(message=str(self.content.get('alert')))
+        payload = dict(message=str(self.content.get('alert')), custom=self.content.get('extra'))
+        log.msg(payload)
 
         gcm.plaintext_request(registration_id=self.token, data=payload)
+        log.msg('Notification sent to %s...' % self.token[:3])
 
 
 if __name__ == '__main__':

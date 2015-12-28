@@ -5,7 +5,7 @@ from klein import Klein
 
 from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.python import log
-
+import json
 from db import Application
 
 app = Klein()
@@ -19,7 +19,8 @@ def notify(request):
     except:
         # TODO: handle this
         returnValue('KO')
-
+    
+    log.msg(request.args)
     response = yield send_now(app_key, request)
 
     returnValue('OK')
@@ -33,11 +34,13 @@ def send_now(app_key, request):
     sound = request.args.get('sound')[0] or 'default'
     badge = request.args.get('badge') or 0
     token = request.args.get('token')[0]
+    extra = request.args.get('extra')[0]
 
     request.setHeader('Content-Type', 'application/json')
 
-    content = dict(alert=message, sound=sound, badge=badge)
+    content = dict(alert=message, sound=sound, badge=badge, extra=json.loads(extra))
     if app:
+        log.msg('application found: %s' % app.name)
         notification = Notification(token=token, app=app, content=content)
         notification.send()
 

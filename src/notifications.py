@@ -42,7 +42,7 @@ class AppleNotification(Notification):
                           )
         
         apns.gateway_server.send_notification(self.token, payload)
-        log.msg('Notification sent to %s...' % self.token[:3])
+        log.msg('Notification sent to %s...' % self.token[:10])
 
 
 class AndroidNotification(Notification):
@@ -52,8 +52,12 @@ class AndroidNotification(Notification):
         payload = dict(message=str(self.content.get('alert')), custom=self.content.get('extra'))
         log.msg(payload)
 
-        gcm.plaintext_request(registration_id=self.token, data=payload)
-        log.msg('Notification sent to %s...' % self.token[:3])
+        try:
+            gcm.plaintext_request(registration_id=self.token, data=payload)
+            log.msg('Notification sent to %s...' % self.token[:10])
+        except:
+            log.msg('Unable to sent to %s...' % self.token[:10])
+            pass
 
 
 if __name__ == '__main__':
